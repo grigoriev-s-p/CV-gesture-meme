@@ -3,7 +3,8 @@ import mediapipe as mp
 import time
 import joblib
 import pandas as pd
-from train import normalize
+import tkinter as tk
+from src.train import normalize
 
 GESTURE_DELAY = 0.4
 WINDOW_SIZE = 800
