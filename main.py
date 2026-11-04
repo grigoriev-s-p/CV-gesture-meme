@@ -3,25 +3,49 @@ import mediapipe as mp
 import time
 import joblib
 import pandas as pd
-import tkinter as tk
 from train import normalize
+
+GESTURE_DELAY = 0.4
+WINDOW_SIZE = 800
+
 
 class ImageWindow:
     def __init__(self):
-        self.root = tk.Tk()
-        self.label = tk.Label(self.root)
-        self.label.pack()
         self.current_path = None
+        self.pending_path = None
+        self.gesture_started = 0.0
+
+    def update_gesture(self, path):
+        if path is None:
+            self.pending_path = None
+            self.hide()
+            return
+
+        now = time.monotonic()
+        if path != self.pending_path:
+            self.pending_path = path
+            self.gesture_started = now
+            self.hide()
+        elif now - self.gesture_started >= GESTURE_DELAY:
+            self.show(path)
 
     def show(self, path):
         if path == self.current_path:
             return
 
-        self.img = tk.PhotoImage(file=path)
-        self.label.config(image=self.img)
+        img = cv2.imread(path)
+        img = cv2.resize(img, (WINDOW_SIZE, WINDOW_SIZE))
+        cv2.namedWindow("Meme", cv2.WINDOW_AUTOSIZE)
+        cv2.imshow("Meme", img)
         self.current_path = path
+
+    def hide(self):
+        if self.current_path is not None:
+            cv2.destroyWindow("Meme")
+            self.current_path = None
+
     def close(self):
-        self.root.destroy()
+        self.hide()
 
 
 model = joblib.load("model.joblib")
@@ -33,7 +57,7 @@ options = mp.tasks.vision.HandLandmarkerOptions(
         model_asset_path="hand_landmarker.task"
     ),
     running_mode=mp.tasks.vision.RunningMode.VIDEO,
-    num_hands=2
+    num_hands=1
 )
 
 
@@ -43,17 +67,16 @@ mpDraw = mp.tasks.vision.drawing_utils
 
 connections = mp.tasks.vision.HandLandmarksConnections.HAND_CONNECTIONS
 
-gestures = {"fist":"C:/Users/11211/Desktop/github/pet-projec/Images/fist.png",
-            "fuck":"C:/Users/11211/Desktop/github/pet-projec/Images/fuck.png",
-            "idk":"C:/Users/11211/Desktop/github/pet-projec/Images/idk.png",
-            "peace":"C:/Users/11211/Desktop/github/pet-projec/Images/peace.png",
-            "rock": "C:/Users/11211/Desktop/github/pet-projec/Images/rock.png",
-            "palm": "C:/Users/11211/Desktop/github/pet-projec/Images/palm.png",
-            "like": "C:/Users/11211/Desktop/github/pet-projec/Images/like.png"}
+gestures = {
+    gesture: f"Images/{gesture}.png"
+    for gesture in ("fist", "fuck", "idk", "peace", "rock", "palm", "like")
+}
 
 img_window = ImageWindow()
 while True:
     success, img = camera.read()
+    if not success:
+        break
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     mpImage = mp.Image(
@@ -63,16 +86,22 @@ while True:
     timestamp = time.monotonic_ns()//1_000_000
     result = hands.detect_for_video(mpImage, timestamp)
 
+    gesture = None
     if result.hand_landmarks:
         for points in result.hand_landmarks:
             mpDraw.draw_landmarks(img, points, connections)
             landmarks = [coord for point in points for coord in (point.x, point.y, point.z)]
             sample = normalize(pd.DataFrame([landmarks + ["Unknown"]]))
             gesture = model.predict(sample.iloc[:,:63])[0]
-            img_window.show(gestures[gesture])
+
+    img_window.update_gesture(gestures.get(gesture))
 
     cv2.imshow("Result:", img)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-    img_window.root.update()
+
+camera.release()
+hands.close()
+img_window.close()
+cv2.destroyAllWindows()

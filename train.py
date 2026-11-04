@@ -18,16 +18,15 @@ def normalize(data):
 
     return data
 
-        
-data = pd.read_csv("data.csv", header=None)
-data = normalize(data)
+if __name__ == "__main__":
+    data = pd.read_csv("data.csv", header=None)
+    data = normalize(data)
 
-X_train = data.iloc[:,:63]
-y_train = data.iloc[:,63]
+    X_train = data.iloc[:,:63]
+    y_train = data.iloc[:,63]
 
+    model = RandomForestClassifier(n_estimators=200, random_state=42, n_jobs=1)
 
-model = RandomForestClassifier(n_estimators=200, random_state=42, n_jobs=1)
+    model.fit(X_train,y_train)
 
-model.fit(X_train,y_train)
-
-joblib.dump(model, "model.joblib")
+    joblib.dump(model, "model.joblib")
