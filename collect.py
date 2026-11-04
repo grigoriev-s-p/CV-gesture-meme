@@ -28,7 +28,7 @@ gesture = "Unknown"
 last_saved = 0
 save_interval = 100
 
-counts = {"palm":0,"fist":0,"like":0, "Unknown":0}
+counts = {}
 while True:
     success, img = camera.read()
     if not success:
@@ -45,15 +45,14 @@ while True:
     if key == ord('r'):
         record = not record
         cv2.putText(img, str(record), (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    if key == ord('1'):
-        gesture = "palm"
+    if key == ord('n'):
         record = False
-    if key == ord('2'):
-        gesture = "fist"
-        record = False
-    if key == ord('3'):
-        gesture = "like"
-        record = False
+        gesture = input("Введите жест: ")
+
+        if gesture:
+            counts[gesture] = 0
+        else:
+            gesture = "Unknown"
 
     if result.hand_landmarks:
 
@@ -61,13 +60,13 @@ while True:
             mpDraw.draw_landmarks(img, points, connections)
             landmarks = [coord for point in points for coord in (point.x, point.y, point.z)]
             if record and gesture!= "Unknown" and timestamp - last_saved >= save_interval:
-                with open("test.csv", "a", newline="") as file:
+                with open("data.csv", "a", newline="") as file:
                     writer = csv.writer (file)
                     writer.writerow(landmarks + [gesture])
                     counts[gesture]+=1
                 last_saved = timestamp
             cv2.putText(img, gesture, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            cv2.putText(img, str(counts[gesture]), (330, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(img, str(counts.get(gesture,0)), (330, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
 
     cv2.imshow("Result:", img)
