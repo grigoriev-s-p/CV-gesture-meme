@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 import joblib
-from src.collect import collect_data_for_training
+from collect import collect_data_for_training
 
 
 def normalize(data):
@@ -23,17 +23,14 @@ class Model:
         self.model =  RandomForestClassifier(n_estimators=n_est, random_state=random_state, n_jobs=n_jobs)
     
     def fit(self,collect_data = False,data = None, path = None, name_for_model_file = "model"):
-        if data == None and collect_data == False:
-            try:
-                self.data = pd.read_csv(path, header = None)
-            except Exception as e:
-                print(e)
+        if path:
+            data = pd.read_csv(path, header = None)
         if collect_data:
             data = collect_data_for_training()
         self.data = normalize(data)
 
-        X_train = data.iloc[:,:63]
-        y_train = data.iloc[:,63]
+        X_train = self.data.iloc[:,:63]
+        y_train = self.data.iloc[:,63]
         self.fit = self.model.fit(X_train,y_train)
         joblib.dump(self.model, f"{name_for_model_file}.joblib")
 
