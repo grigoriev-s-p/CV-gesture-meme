@@ -4,7 +4,7 @@ import time
 import joblib
 import pandas as pd
 import tkinter as tk
-from train import normalize
+from src.train import normalize
 
 class ImageWindow:
     def __init__(self):
