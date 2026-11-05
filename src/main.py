@@ -48,7 +48,7 @@ class ImageWindow:
         self.hide()
 
 
-model = joblib.load("model.joblib")
+model = joblib.load("models/model.joblib")
 
 camera = cv2.VideoCapture(0)
 mpHands = mp.tasks.vision.HandLandmarker
@@ -67,13 +67,13 @@ mpDraw = mp.tasks.vision.drawing_utils
 
 connections = mp.tasks.vision.HandLandmarksConnections.HAND_CONNECTIONS
 
-gestures = {"fist":"C:/Users/11211/Desktop/github/pet-projec/assets/fist.png",
-            "fuck":"C:/Users/11211/Desktop/github/pet-projec/assets/fuck.png",
-            "idk":"C:/Users/11211/Desktop/github/pet-projec/assets/idk.png",
-            "peace":"C:/Users/11211/Desktop/github/pet-projec/assets/peace.png",
-            "rock": "C:/Users/11211/Desktop/github/pet-projec/assets/rock.png",
-            "palm": "C:/Users/11211/Desktop/github/pet-projec/assets/palm.png",
-            "like": "C:/Users/11211/Desktop/github/pet-projec/assets/like.png"}
+gestures = {"fist":"assets/fist.png",
+            "fuck":"assets/fuck.png",
+            "idk":"assets/idk.png",
+            "peace":"assets/peace.png",
+            "rock": "assets/rock.png",
+            "palm": "assets/palm.png",
+            "like": "assets/like.png"}
 
 img_window = ImageWindow()
 while True:

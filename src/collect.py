@@ -8,7 +8,7 @@ def collect_data_for_training():
     mpHands = mp.tasks.vision.HandLandmarker
     options = mp.tasks.vision.HandLandmarkerOptions(
         base_options=mp.tasks.BaseOptions(
-            model_asset_path="hand_landmarker.task"
+            model_asset_path="models/hand_landmarker.task"
         ),
         running_mode=mp.tasks.vision.RunningMode.VIDEO,
         num_hands=1
@@ -59,7 +59,7 @@ def collect_data_for_training():
                 mpDraw.draw_landmarks(img, points, connections)
                 landmarks = [coord for point in points for coord in (point.x, point.y, point.z)]
                 if record and gesture!= "Unknown" and timestamp - last_saved >= save_interval:
-                    with open("C:/Users/11211/Desktop/github/pet-projec/data/data.csv", "a", newline="") as file:
+                    with open("data/data.csv", "a", newline="") as file:
                         writer = csv.writer (file)
                         writer.writerow(landmarks + [gesture])
                         counts[gesture]+=1

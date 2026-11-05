@@ -32,7 +32,6 @@ class Model:
         X_train = self.data.iloc[:,:63]
         y_train = self.data.iloc[:,63]
         self.fit = self.model.fit(X_train,y_train)
-        joblib.dump(self.model, f"{name_for_model_file}.joblib")
+        joblib.dump(self.model, f"models/{name_for_model_file}.joblib")
 
-model = Model()
-model.fit(path = "C:/Users/11211/Desktop/github/pet-projec/data/data.csv")
+
